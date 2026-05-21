@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header calendar-header">
+    <div>
+        <h1>{{ month_name }} {{ year }}</h1>
+        <p>Monthly trading calendar.</p>
+    </div>
+
+    <div class="calendar-nav">
+        <a href="/calendar?year={{ prev_year }}&month={{ prev_month }}">Previous</a>
+        <a href="/calendar?year={{ next_year }}&month={{ next_month }}">Next</a>
+    </div>
+</div>
+
+<div class="calendar-grid calendar-weekdays">
+    <div>Sun</div>
+    <div>Mon</div>
+    <div>Tue</div>
+    <div>Wed</div>
+    <div>Thu</div>
+    <div>Fri</div>
+    <div>Sat</div>
+</div>
+
+<div class="calendar-grid">
+    {% for week in month_days %}
+        {% for day in week %}
+            {% set day_str = day.isoformat() %}
+            {% set trades = trades_by_date.get(day_str, []) %}
+
+           <div class="calendar-day
+    {% if day.month != month %}muted-day{% endif %}
+    {% if day_str == today %}today{% endif %}
+    {% if trades %}
+        day-result-{{ trades[0].result|replace(' ', '-') }}
+    {% endif %}
+    ">
+                <a href="/calendar/day/{{ day_str }}" class="day-number-link">
+                     {{ day.day }}
+                </a>
+
+                {% for trade in trades %}
+                    <a href="/trades/{{ trade.id }}" class="trade-dot result-{{ trade.result|replace(' ', '-') }}">
+                        {{ trade.symbol }} - {{ trade.result }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}

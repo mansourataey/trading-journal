@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>First Setup - Trading Journal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth-body">
+
+    <div class="auth-card">
+        <div class="auth-brand">
+            <h1>First Setup</h1>
+            <p>Create your secure Trading Journal account.</p>
+        </div>
+
+        {% if error %}
+            <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/setup" method="post" enctype="multipart/form-data" class="auth-form">
+
+            <input type="text" name="full_name" placeholder="Full Name" required>
+
+            <input type="text" name="username" placeholder="Username or Email" required>
+
+            <div class="file-upload-box">
+                <label for="profile_photo">Profile Photo</label>
+                <input type="file" id="profile_photo" name="profile_photo" accept=".jpg,.jpeg,.png,.webp">
+            </div>
+
+            <input type="password" name="password" placeholder="Password" required>
+
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>
+                Developed by
+                <a href="https://github.com/mansourataey" target="_blank">
+                    Mohammad Mansour Ataey
+                </a>
+            </p>
+            <p>
+                Dedicated to
+                <a href="https://mr7trades.com/" target="_blank">
+                    MR7
+                </a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

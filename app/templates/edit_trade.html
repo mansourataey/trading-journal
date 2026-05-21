@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Trade</h1>
+    <p>Update your trade journal entry.</p>
+</div>
+
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<form class="trade-form" action="/trades/{{ trade.id }}/edit" method="post">
+
+    <div class="floating-group">
+        <input type="date" name="trade_date" value="{{ trade.trade_date }}" placeholder=" " required>
+        <label>Date</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="text" name="symbol" value="{{ trade.symbol }}" placeholder=" " required>
+        <label>Symbol</label>
+    </div>
+
+    <div class="floating-group">
+        <select name="direction" required>
+            <option value="Buy" {% if trade.direction == "Buy" %}selected{% endif %}>Buy</option>
+            <option value="Sell" {% if trade.direction == "Sell" %}selected{% endif %}>Sell</option>
+        </select>
+        <label>Direction</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="entry_price" value="{{ trade.entry_price }}" placeholder=" " required>
+        <label>Entry Price</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="stop_loss" value="{{ trade.stop_loss }}" placeholder=" " required>
+        <label>Stop Loss</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="take_profit" value="{{ trade.take_profit }}" placeholder=" " required>
+        <label>Take Profit</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="lot_size" value="{{ trade.lot_size }}" placeholder=" " required>
+        <label>Lot Size</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="risk_amount" value="{{ trade.risk_amount }}" placeholder=" " required>
+        <label>Risk Amount ($)</label>
+    </div>
+
+    <div class="floating-group">
+        <select name="result" required>
+            <option value="TP" {% if trade.result == "TP" %}selected{% endif %}>Take Profit</option>
+            <option value="SL" {% if trade.result == "SL" %}selected{% endif %}>Stop Loss</option>
+            <option value="BE" {% if trade.result == "BE" %}selected{% endif %}>Break Even</option>
+            <option value="Manual Close" {% if trade.result == "Manual Close" %}selected{% endif %}>Manual Close</option>
+        </select>
+        <label>Result</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="number" step="any" name="profit_loss" value="{{ trade.profit_loss }}" placeholder=" " required>
+        <label>Profit / Loss ($)</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="text" name="strategy" value="{{ trade.strategy or '' }}" placeholder=" ">
+        <label>Strategy</label>
+    </div>
+
+    <div class="floating-group">
+        <input type="text" name="mistake" list="mistake-list" value="{{ trade.mistake or '' }}" placeholder=" ">
+        <label>Mistake</label>
+    </div>
+
+    <datalist id="mistake-list">
+        <option value="No Mistake">
+        <option value="Entered Too Early">
+        <option value="Entered Too Late">
+        <option value="Moved Stop Loss">
+        <option value="Overtrading">
+        <option value="Revenge Trade">
+        <option value="No Confirmation">
+        <option value="Bad Risk Management">
+        <option value="Ignored News">
+    </datalist>
+
+    <div class="floating-group">
+        <input type="text" name="emotion" value="{{ trade.emotion or '' }}" placeholder=" ">
+        <label>Emotion</label>
+    </div>
+
+    <div class="notes-group">
+    <label>Trade Notes</label>
+    <textarea name="notes" placeholder="Write your trade notes...">{{ trade.notes or '' }}</textarea>
+    </div>
+
+    <button type="submit">Update Trade</button>
+</form>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Profile</h1>
+    <p>Manage your account information.</p>
+</div>
+
+<div class="profile-layout">
+
+    <div class="profile-card">
+        {% if user.profile_photo %}
+            <img class="profile-photo" src="{{ user.profile_photo }}" alt="Profile Photo">
+        {% else %}
+            <div class="profile-placeholder">No Photo</div>
+        {% endif %}
+
+        <h2>{{ user.full_name }}</h2>
+        <p>{{ user.username }}</p>
+    </div>
+
+    <div class="profile-card">
+        <h3>Edit Profile</h3>
+        {% if profile_error %}
+        <p style="color:red;">{{ profile_error }}</p>
+        {% endif %}
+        {% if profile_success %}
+    <p style="color:green;">{{ profile_success }}</p>
+{% endif %}
+        <form action="/profile/update" method="post" enctype="multipart/form-data" class="profile-form">
+            <input type="text" name="full_name" value="{{ user.full_name }}" required>
+            <input type="text" name="username" value="{{ user.username }}" required>
+            <input type="file" name="profile_photo">
+
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+
+    <div class="profile-card">
+        <h3>Change Password</h3>
+
+        {% if password_error %}
+            <p style="color:red;">{{ password_error }}</p>
+        {% endif %}
+
+        {% if password_success %}
+            <p style="color:green;">{{ password_success }}</p>
+        {% endif %}
+
+        <form action="/profile/change-password" method="post" class="profile-form">
+            <input type="password" name="current_password" placeholder="Current Password" required>
+            <input type="password" name="new_password" placeholder="New Password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+
+            <button type="submit">Change Password</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "Trading Journal" }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Trading Journal</h2>
+                <p>Professional Trading Analytics</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/trades/add" class="{% if request.url.path == '/trades/add' %}active{% endif %}">Add Trade</a>
+                <a href="/trades/history" class="{% if request.url.path.startswith('/trades/history') %}active{% endif %}">Trade History</a>
+                <a href="/calendar" class="{% if request.url.path.startswith('/calendar') %}active{% endif %}">Calendar</a>
+                <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">Profile</a>
+                <a href="/export">Export</a>
+                <a href="/backup" class="{% if request.url.path == '/backup' %}active{% endif %}">Backup</a>
+                <a href="/logout" class="logout" onclick="return confirm('Are you sure you want to logout?');">Logout</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>
+                    Developed by
+                    <a href="https://github.com/mansourataey" target="_blank">
+                        Mohammad Mansour Ataey
+                    </a>
+                </p>
+
+                <p>
+                    Dedicated to
+                    <a href="https://mr7trades.com/" target="_blank">
+                        MR7
+                    </a>
+                </p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+</body>
+</html>

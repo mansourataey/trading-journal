@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Backup & Restore</h1>
+    <p>Protect your journal data and screenshots.</p>
+</div>
+
+<div class="backup-layout">
+
+    <div class="section-card">
+        <h2>Download Backup</h2>
+        <p>This will download a ZIP file containing your database and uploaded screenshots.</p>
+
+        <a class="button-link" href="/backup/download">
+            Download Full Backup
+        </a>
+    </div>
+
+    <div class="section-card">
+        <h2>Restore Backup</h2>
+        <p>Upload a valid Trading Journal backup ZIP file.</p>
+
+        {% if success %}
+            <p style="color:green;">{{ success }}</p>
+        {% endif %}
+
+        {% if error %}
+            <p style="color:red;">{{ error }}</p>
+        {% endif %}
+
+        <form action="/backup/restore" method="post" enctype="multipart/form-data" class="backup-form">
+            <input type="file" name="backup_file" accept=".zip" required>
+            <button type="submit" onclick="return confirm('Restoring backup will replace current data. Continue?');">
+                Restore Backup
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

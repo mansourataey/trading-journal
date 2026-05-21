@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header dashboard-header">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Your trading performance overview.</p>
+    </div>
+</div>
+
+<div class="cards dashboard-cards">
+    <div class="card stat-card"><h3>Total Trades</h3><p>{{ total_trades }}</p></div>
+    <div class="card stat-card"><h3>Win Rate</h3><p>{{ win_rate }}%</p></div>
+    <div class="card stat-card"><h3>Total P/L</h3><p class="{% if total_pl >= 0 %}profit-text{% else %}loss-text{% endif %}">${{ total_pl }}</p></div>
+    <div class="card stat-card"><h3>Average RR</h3><p>{{ average_rr }}</p></div>
+    <div class="card stat-card"><h3>Total Wins</h3><p class="profit-text">{{ total_wins }}</p></div>
+    <div class="card stat-card"><h3>Total Losses</h3><p class="loss-text">{{ total_losses }}</p></div>
+    <div class="card stat-card"><h3>Best Trade</h3><p class="profit-text">${{ best_trade }}</p></div>
+    <div class="card stat-card"><h3>Worst Trade</h3><p class="loss-text">${{ worst_trade }}</p></div>
+    <div class="card stat-card"><h3>Most Traded Symbol</h3><p>{{ most_traded_symbol }}</p></div>
+    <div class="card stat-card"><h3>Biggest Mistake</h3><p>{{ biggest_mistake }}</p></div>
+</div>
+
+<div class="dashboard-sections">
+    <div class="section-card">
+        <h2>Strategy Performance</h2>
+        <table class="trade-table">
+            <thead>
+                <tr>
+                    <th>Strategy</th>
+                    <th>Trades</th>
+                    <th>Total P/L</th>
+                    <th>Win Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for strategy, data in strategy_data.items() %}
+                <tr>
+                    <td>{{ strategy }}</td>
+                    <td>{{ data.trades }}</td>
+                    <td class="{% if data.profit_loss >= 0 %}profit-text{% else %}loss-text{% endif %}">${{ data.profit_loss }}</td>
+                    <td>{{ data.win_rate }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-card">
+        <h2>Mistake Analytics</h2>
+        <table class="trade-table">
+            <thead>
+                <tr>
+                    <th>Mistake</th>
+                    <th>Count</th>
+                    <th>Total Loss</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mistake, data in mistake_stats.items() %}
+                <tr>
+                    <td>{{ mistake }}</td>
+                    <td>{{ data.count }}</td>
+                    <td class="loss-text">${{ data.loss }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="section-card">
+    <h2>Recent Trades</h2>
+    <table class="trade-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Symbol</th>
+                <th>Direction</th>
+                <th>Result</th>
+                <th>P/L</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trade in recent_trades %}
+            <tr>
+                <td>{{ trade.trade_date }}</td>
+                <td><a href="/trades/{{ trade.id }}">{{ trade.symbol }}</a></td>
+                <td>{{ trade.direction }}</td>
+                <td>
+                    <span class="badge result-{{ trade.result|replace(' ', '-') }}">
+                        {{ trade.result }}
+                    </span>
+                </td>
+                <td class="{% if trade.profit_loss >= 0 %}profit-text{% else %}loss-text{% endif %}">
+                    ${{ trade.profit_loss }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+.env
+
+# Database and user data
+app/data/journal.db
+
+# Uploaded user files
+app/static/uploads/
+app/static/exports/
+app/static/backups/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
