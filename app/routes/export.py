@@ -2,18 +2,20 @@ from pathlib import Path
 import shutil
 import zipfile
 from datetime import datetime
+from tkinter import Tk, filedialog
 
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from openpyxl import Workbook
 
 from app.database import get_db
 from app.models import Trade
+from app.paths import EXPORT_DIR, STATIC_DIR
+
 
 router = APIRouter()
 
-EXPORT_DIR = Path("app/static/exports")
 EXPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -30,6 +32,25 @@ def clean_old_exports():
                 shutil.rmtree(item)
         except Exception:
             pass
+
+
+def static_path_to_file(static_path: str) -> Path:
+    return STATIC_DIR / static_path.replace("/static/", "")
+
+
+def ask_save_location(default_name: str):
+    root = Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
+
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".zip",
+        initialfile=default_name,
+        filetypes=[("ZIP files", "*.zip")]
+    )
+
+    root.destroy()
+    return file_path
 
 
 @router.get("/export")
@@ -69,7 +90,7 @@ def export_trades(request: Request, db: Session = Depends(get_db)):
         screenshot_links = []
 
         for index, image in enumerate(trade.images, start=1):
-            source_path = Path("app" + image.image_path)
+            source_path = static_path_to_file(image.image_path)
 
             if source_path.exists():
                 file_name = f"trade_{trade.id}_chart_{index}{source_path.suffix}"
@@ -116,8 +137,9 @@ def export_trades(request: Request, db: Session = Depends(get_db)):
         for file in screenshots_folder.iterdir():
             zipf.write(file, arcname=f"screenshots/{file.name}")
 
-    return FileResponse(
-        path=zip_path,
-        filename=zip_path.name,
-        media_type="application/zip"
-    )
+    save_path = ask_save_location(zip_path.name)
+
+    if save_path:
+        shutil.copy2(zip_path, save_path)
+
+    return RedirectResponse("/dashboard", status_code=302)

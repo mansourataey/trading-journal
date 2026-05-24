@@ -9,11 +9,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-
 from app.database import Base, engine, SessionLocal
 from app import models  # noqa: F401
 from app.models import User, Trade
 from app.routes import auth, trades, profile, export, backup
+from app.paths import STATIC_DIR, TEMPLATES_DIR
 
 
 app = FastAPI(title="Trading Journal")
@@ -27,9 +27,9 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 app.include_router(auth.router)
 app.include_router(trades.router)
@@ -71,7 +71,6 @@ def dashboard(request: Request):
     total_pl = round(sum(t.profit_loss or 0 for t in all_trades), 2)
 
     profits = [t.profit_loss for t in all_trades if t.profit_loss is not None]
-
     winning_profits = [p for p in profits if p > 0]
     losing_profits = [p for p in profits if p < 0]
 
@@ -86,10 +85,7 @@ def dashboard(request: Request):
     for t in all_trades:
         if t.mistake:
             if t.mistake not in mistake_stats:
-                mistake_stats[t.mistake] = {
-                    "count": 0,
-                    "loss": 0
-                }
+                mistake_stats[t.mistake] = {"count": 0, "loss": 0}
 
             mistake_stats[t.mistake]["count"] += 1
 
@@ -150,11 +146,7 @@ def dashboard(request: Request):
             (wins / trades_count) * 100, 2
         ) if trades_count > 0 else 0
 
-    recent_trades = sorted(
-        all_trades,
-        key=lambda x: x.id,
-        reverse=True
-    )[:5]
+    recent_trades = sorted(all_trades, key=lambda x: x.id, reverse=True)[:5]
 
     return templates.TemplateResponse(
         request,

@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Trade, TradeImage
+from app.paths import TEMPLATES_DIR, TRADE_UPLOAD_DIR
+
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-TRADE_UPLOAD_DIR = Path("app/static/uploads/trades")
 TRADE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -45,6 +46,10 @@ def make_safe_image_name(file: UploadFile):
     if ext == ".jpeg":
         ext = ".jpg"
     return f"{uuid.uuid4().hex}{ext}"
+
+
+def local_file_from_static_path(static_path: str):
+    return TRADE_UPLOAD_DIR.parent.parent / static_path.replace("/static/", "")
 
 
 def validate_trade_numbers(entry_price, stop_loss, take_profit, lot_size, risk_amount):
@@ -227,7 +232,7 @@ def delete_trade(trade_id: int, request: Request, db: Session = Depends(get_db))
 
     for image in trade.images:
         if image.image_path:
-            local_path = "app" + image.image_path
+            local_path = local_file_from_static_path(image.image_path)
             if os.path.exists(local_path):
                 os.remove(local_path)
 
@@ -351,7 +356,7 @@ def delete_trade_image(
     trade_id = image.trade_id
 
     if image.image_path:
-        local_path = "app" + image.image_path
+        local_path = local_file_from_static_path(image.image_path)
         if os.path.exists(local_path):
             os.remove(local_path)
 

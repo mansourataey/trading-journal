@@ -1,5 +1,6 @@
-from pathlib import Path
 import shutil
+import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Request, Form, UploadFile, File, Depends
 from fastapi.responses import RedirectResponse
@@ -9,14 +10,15 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
+from app.paths import TEMPLATES_DIR, PROFILE_UPLOAD_DIR
+
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-UPLOAD_DIR = Path("app/static/uploads/profile")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+PROFILE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_current_user(request: Request, db: Session):
@@ -30,6 +32,15 @@ def get_current_user(request: Request, db: Session):
 
 def password_too_long(password: str) -> bool:
     return len(password.encode("utf-8")) > 72
+
+
+def make_safe_profile_name(filename: str) -> str:
+    ext = Path(filename).suffix.lower()
+
+    if ext == ".jpeg":
+        ext = ".jpg"
+
+    return f"{uuid.uuid4().hex}{ext}"
 
 
 @router.get("/setup")
@@ -74,12 +85,13 @@ def create_first_user(
     photo_path = None
 
     if profile_photo and profile_photo.filename:
-        file_path = UPLOAD_DIR / profile_photo.filename
+        safe_name = make_safe_profile_name(profile_photo.filename)
+        file_path = PROFILE_UPLOAD_DIR / safe_name
 
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(profile_photo.file, buffer)
 
-        photo_path = f"/static/uploads/profile/{profile_photo.filename}"
+        photo_path = f"/static/uploads/profile/{safe_name}"
 
     hashed_password = pwd_context.hash(password)
 

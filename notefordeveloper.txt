@@ -1,4 +1,0 @@
-#for security purpose use this in command line
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser 
-# this line is for entring virtual enverment for you
-.\venv\Scripts\Activate.ps1

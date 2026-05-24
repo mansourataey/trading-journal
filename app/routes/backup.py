@@ -1,21 +1,24 @@
-from pathlib import Path
 import shutil
 import zipfile
+from pathlib import Path
 from datetime import datetime
+from tkinter import Tk, filedialog
 
 from fastapi import APIRouter, Request, UploadFile, File
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.paths import TEMPLATES_DIR, DATA_DIR, UPLOADS_DIR, BACKUP_DIR
+
+
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-DATA_DIR = Path("app/data")
-DB_PATH = DATA_DIR / "journal.db"
-
-UPLOADS_DIR = Path("app/static/uploads")
-BACKUP_DIR = Path("app/static/backups")
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+DB_PATH = DATA_DIR / "journal.db"
 
 
 def require_login(request: Request):
@@ -40,6 +43,21 @@ def is_valid_backup_zip(zip_path: Path) -> bool:
             return "journal.db" in names
     except Exception:
         return False
+
+
+def ask_save_location(default_name: str):
+    root = Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
+
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".zip",
+        initialfile=default_name,
+        filetypes=[("ZIP files", "*.zip")]
+    )
+
+    root.destroy()
+    return file_path
 
 
 @router.get("/backup")
@@ -69,11 +87,12 @@ def download_backup(request: Request):
                 if file.is_file():
                     zipf.write(file, arcname=f"uploads/{file.relative_to(UPLOADS_DIR)}")
 
-    return FileResponse(
-        path=backup_path,
-        filename=backup_path.name,
-        media_type="application/zip"
-    )
+    save_path = ask_save_location(backup_path.name)
+
+    if save_path:
+        shutil.copy2(backup_path, save_path)
+
+    return RedirectResponse("/backup", status_code=302)
 
 
 @router.post("/backup/restore")
@@ -128,9 +147,7 @@ def restore_backup(request: Request, backup_file: UploadFile = File(...)):
         shutil.rmtree(temp_restore)
 
         request.session.clear()
-
-        response = RedirectResponse(url="/login", status_code=302)
-        return response
+        return RedirectResponse(url="/login", status_code=302)
 
     except Exception:
         if temp_restore.exists():

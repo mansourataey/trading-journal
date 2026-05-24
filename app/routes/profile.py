@@ -11,13 +11,14 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
+from app.paths import TEMPLATES_DIR, PROFILE_UPLOAD_DIR
+
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-PROFILE_UPLOAD_DIR = Path("app/static/uploads/profile")
 PROFILE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -34,8 +35,16 @@ def password_is_weak(password: str) -> bool:
 
 
 def unique_filename(original_name: str) -> str:
-    ext = Path(original_name).suffix
+    ext = Path(original_name).suffix.lower()
+
+    if ext == ".jpeg":
+        ext = ".jpg"
+
     return f"{uuid.uuid4().hex}{ext}"
+
+
+def local_profile_path(static_path: str):
+    return PROFILE_UPLOAD_DIR.parent.parent / static_path.replace("/static/", "")
 
 
 @router.get("/profile")
@@ -91,7 +100,7 @@ def update_profile(
 
     if profile_photo and profile_photo.filename:
         if user.profile_photo:
-            old_path = "app" + user.profile_photo
+            old_path = local_profile_path(user.profile_photo)
             if os.path.exists(old_path):
                 os.remove(old_path)
 
